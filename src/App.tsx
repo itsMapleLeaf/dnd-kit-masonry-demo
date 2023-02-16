@@ -70,45 +70,28 @@ export function App() {
 function Cell({ item }: { item: Item }) {
   const sortable = useSortable({
     id: item.id,
-    animateLayoutChanges: (args) => {
-      // return false
-      // return args.isSorting
-      return !args.wasDragging
-    },
   })
 
-  const getPlaceholderHeight = () => {
-    if (sortable.isOver && sortable.active) {
-      return sortable.active.rect.current.initial?.height
-    }
-
-    if (sortable.isDragging && sortable.over) {
-      return sortable.over.rect.height
-    }
-
-    return item.height
-  }
-
   return (
-    <div style={{ height: getPlaceholderHeight(), transition: "0.2s height" }}>
-      <div
-        ref={sortable.setNodeRef}
-        style={{
-          height: item.height,
-          lineHeight: item.height + "px",
-          transform: CSS.Translate.toString(sortable.transform),
-          transition: sortable.transition,
-          // opacity:
-          //   sortable.isOver && sortable.over?.id !== sortable.active?.id
-          //     ? 0.5
-          //     : 1,
-        }}
-        {...sortable.attributes}
-        {...sortable.listeners}
-        className="bg-blue-700 text-white font-bold text-center text-6xl"
-      >
-        {item.id}
-      </div>
+    <div
+      ref={sortable.setNodeRef}
+      style={{
+        height: item.height,
+        lineHeight: item.height + "px",
+        transform: sortable.isDragging
+          ? CSS.Translate.toString(sortable.transform)
+          : undefined,
+        transition: sortable.transition,
+        opacity:
+          sortable.isOver && sortable.over?.id !== sortable.active?.id
+            ? 0.5
+            : 1,
+      }}
+      {...sortable.attributes}
+      {...sortable.listeners}
+      className="bg-blue-700 text-white font-bold text-center text-6xl"
+    >
+      {item.id}
     </div>
   )
 }

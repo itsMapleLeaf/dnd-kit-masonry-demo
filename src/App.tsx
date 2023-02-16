@@ -9,7 +9,6 @@ import {
 } from "@dnd-kit/core"
 import {
   arraySwap,
-  rectSwappingStrategy,
   SortableContext,
   sortableKeyboardCoordinates,
   useSortable,
@@ -41,7 +40,7 @@ export function App() {
     <DndContext
       sensors={sensors}
       collisionDetection={closestCorners}
-      onDragEnd={(event) => {
+      onDragOver={(event) => {
         const { active, over } = event
         if (over && active.id !== over.id) {
           setItems((items) => {
@@ -53,7 +52,7 @@ export function App() {
       }}
     >
       <div className="p-4 overflow-clip">
-        <SortableContext items={items} strategy={rectSwappingStrategy}>
+        <SortableContext items={items} strategy={() => null}>
           <Masonry
             items={items}
             itemKey={(item) => item.id}
@@ -70,45 +69,22 @@ export function App() {
 function Cell({ item }: { item: Item }) {
   const sortable = useSortable({
     id: item.id,
-    animateLayoutChanges: (args) => {
-      // return false
-      // return args.isSorting
-      return !args.wasDragging
-    },
   })
 
-  const getPlaceholderHeight = () => {
-    if (sortable.isOver && sortable.active) {
-      return sortable.active.rect.current.initial?.height
-    }
-
-    if (sortable.isDragging && sortable.over) {
-      return sortable.over.rect.height
-    }
-
-    return item.height
-  }
-
   return (
-    <div style={{ height: getPlaceholderHeight(), transition: "0.2s height" }}>
-      <div
-        ref={sortable.setNodeRef}
-        style={{
-          height: item.height,
-          lineHeight: item.height + "px",
-          transform: CSS.Translate.toString(sortable.transform),
-          transition: sortable.transition,
-          // opacity:
-          //   sortable.isOver && sortable.over?.id !== sortable.active?.id
-          //     ? 0.5
-          //     : 1,
-        }}
-        {...sortable.attributes}
-        {...sortable.listeners}
-        className="bg-blue-700 text-white font-bold text-center text-6xl"
-      >
-        {item.id}
-      </div>
+    <div
+      ref={sortable.setNodeRef}
+      style={{
+        height: item.height,
+        lineHeight: item.height + "px",
+        transform: CSS.Translate.toString(sortable.transform),
+        transition: sortable.transition,
+      }}
+      {...sortable.attributes}
+      {...sortable.listeners}
+      className="bg-blue-700 text-white font-bold text-center text-6xl"
+    >
+      {item.id}
     </div>
   )
 }

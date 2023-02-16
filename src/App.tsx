@@ -78,7 +78,6 @@ function Cell({ item }: { item: Item }) {
         height: item.height,
         lineHeight: item.height + "px",
         transform: CSS.Translate.toString(sortable.transform),
-        transition: sortable.transition,
       }}
       {...sortable.attributes}
       {...sortable.listeners}

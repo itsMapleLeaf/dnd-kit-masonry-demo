@@ -13,7 +13,7 @@ import {
   sortableKeyboardCoordinates,
   useSortable,
 } from "@dnd-kit/sortable"
-import { CSS } from "@dnd-kit/utilities"
+import { motion } from "framer-motion"
 import { useState } from "react"
 import { Masonry } from "./Masonry"
 import { range } from "./range"
@@ -40,7 +40,7 @@ export function App() {
     <DndContext
       sensors={sensors}
       collisionDetection={closestCorners}
-      onDragOver={(event) => {
+      onDragEnd={(event) => {
         const { active, over } = event
         if (over && active.id !== over.id) {
           setItems((items) => {
@@ -51,37 +51,64 @@ export function App() {
         }
       }}
     >
-      <div className="p-4 overflow-clip">
+      <motion.div className="p-4 overflow-clip" layout>
         <SortableContext items={items} strategy={() => null}>
           <Masonry
             items={items}
             itemKey={(item) => item.id}
             columnWidth={300}
             gap={8}
-            renderItem={(item) => <Cell item={item} />}
+            renderItem={(item) => (
+              <SortableCell id={item.id}>
+                <ItemBox item={item} />
+              </SortableCell>
+            )}
           />
         </SortableContext>
-      </div>
+      </motion.div>
     </DndContext>
   )
 }
 
-function Cell({ item }: { item: Item }) {
-  const sortable = useSortable({
-    id: item.id,
-  })
+function SortableCell({
+  id,
+  children,
+}: {
+  id: string | number
+  children: React.ReactNode
+}) {
+  const sortable = useSortable({ id })
 
   return (
-    <div
+    <motion.div
+      layoutId={String(id)}
       ref={sortable.setNodeRef}
+      animate={
+        sortable.transform
+          ? {
+              x: sortable.transform.x,
+              y: sortable.transform.y,
+              opacity: sortable.over ? 0.5 : 1,
+            }
+          : { x: 0, y: 0, opacity: sortable.isOver ? 0.75 : 1 }
+      }
+      transition={sortable.isDragging ? { duration: 0 } : undefined}
+      {...sortable.attributes}
+      {...sortable.listeners}
+    >
+      {children}
+    </motion.div>
+  )
+}
+
+function ItemBox({ item }: { item: Item }) {
+  return (
+    <div
+      className="bg-blue-700 text-white font-bold text-center text-6xl"
       style={{
         height: item.height,
         lineHeight: item.height + "px",
-        transform: CSS.Translate.toString(sortable.transform),
       }}
-      {...sortable.attributes}
-      {...sortable.listeners}
-      className="bg-blue-700 text-white font-bold text-center text-6xl"
     >
       {item.id}
     </div>
